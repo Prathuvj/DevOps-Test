@@ -1,61 +1,66 @@
 # DevOps Pipeline Demo
 
-This is a simple Flask application deployed using a complete DevOps pipeline with Docker, Jenkins, Terraform, and AWS.
+This is a simple Flask application deployed using a complete DevOps pipeline with Docker, GitHub Actions, Terraform, and AWS.
 
 ## Prerequisites
 
-1. Docker installed
-2. Jenkins server running
-3. AWS account with appropriate credentials
-4. Terraform installed
-5. Git installed
+- Python 3.9+
+- Docker
+- AWS Account
+- GitHub Account
+- Terraform
 
-## Setup Instructions
+## Local Development
 
-### 1. Local Development
+1. Create a virtual environment:
 ```bash
-# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-# Install dependencies
+2. Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 
-# Run the application
+3. Run the application:
+```bash
 python app.py
 ```
 
-### 2. Docker Build
+## Docker
+
+Build and run the Docker container:
 ```bash
-docker build -t devops-app .
-docker run -p 5000:5000 devops-app
+docker build -t devops-pipeline-app .
+docker run -p 5000:5000 devops-pipeline-app
 ```
 
-### 3. Jenkins Setup
-1. Create a new pipeline job in Jenkins
-2. Configure it to use the Jenkinsfile from this repository
-3. Add AWS credentials in Jenkins credentials store
-4. Configure the pipeline to run on code changes
+## AWS Setup
 
-### 4. AWS Setup
-1. Create an ECR repository
-2. Update the AWS credentials in Jenkins
-3. Update the subnet and security group IDs in terraform/main.tf
+1. Create an AWS account if you don't have one
+2. Create an IAM user with appropriate permissions
+3. Add the following secrets to your GitHub repository:
+   - AWS_ACCESS_KEY_ID
+   - AWS_SECRET_ACCESS_KEY
 
-### 5. Terraform Deployment
+## Terraform Setup
+
+1. Update the subnet and security group IDs in `terraform/main.tf`
+2. Initialize Terraform:
 ```bash
 cd terraform
 terraform init
-terraform plan
-terraform apply
 ```
 
-## Pipeline Flow
-1. Code is pushed to Git repository
-2. Jenkins pipeline is triggered
-3. Docker image is built and tested
-4. Image is pushed to AWS ECR
-5. Terraform deploys the application to AWS ECS
+## Deployment
+
+The application will automatically deploy when you push to the main branch. The GitHub Actions workflow will:
+1. Build the Docker image
+2. Push it to AWS ECR
+3. Deploy the infrastructure using Terraform
+4. Deploy the application to AWS ECS
 
 ## Accessing the Application
-Once deployed, the application will be available at the ECS service endpoint on port 5000. 
+
+Once deployed, you can access the application at the URL provided by AWS ECS. 
