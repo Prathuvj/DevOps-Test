@@ -1,29 +1,17 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 }
 
-# ECR Repository
 resource "aws_ecr_repository" "app" {
-  name = "python-devops-demo"
+  name = "devops-app"
 }
 
-# ECS Cluster
 resource "aws_ecs_cluster" "main" {
-  name = "python-devops-cluster"
+  name = "devops-cluster"
 }
 
-# ECS Task Definition
 resource "aws_ecs_task_definition" "app" {
-  family                   = "python-app"
+  family                   = "devops-app"
   network_mode            = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                     = 256
@@ -31,7 +19,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name  = "python-app"
+      name  = "devops-app"
       image = "${aws_ecr_repository.app.repository_url}:latest"
       portMappings = [
         {
@@ -44,23 +32,16 @@ resource "aws_ecs_task_definition" "app" {
   ])
 }
 
-# Security Group
-resource "aws_security_group" "ecs_tasks" {
-  name        = "ecs-tasks-sg"
-  description = "Allow inbound traffic for ECS tasks"
-  vpc_id      = var.vpc_id
+resource "aws_ecs_service" "app" {
+  name            = "devops-app-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
 
-  ingress {
-    protocol    = "tcp"
-    from_port   = 5000
-    to_port     = 5000
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+  network_configuration {
+    subnets          = ["subnet-xxxxxx"] # Replace with your subnet ID
+    security_groups  = ["sg-xxxxxx"]     # Replace with your security group ID
+    assign_public_ip = true
   }
 } 
